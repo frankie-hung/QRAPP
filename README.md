@@ -4,6 +4,10 @@ A lightweight, browser-based QR code scanner web application that works directly
 
 **🔗 Live Demo:** [https://frankie-hung.github.io/qr-reader/](https://frankie-hung.github.io/qr-reader/)
 
+## 📸 Screenshot
+
+<img src="screenshot.jpg" alt="App Screenshot" width="250">
+
 ## ✨ Features
 
 - **Instant Scanning:** Uses your device's camera to scan QR codes in real-time.
@@ -24,7 +28,7 @@ A lightweight, browser-based QR code scanner web application that works directly
 - **HTML5 / CSS3 / JavaScript**
 - **[qr-scanner](https://github.com/nimiq/qr-scanner)** library for detection
 - Hosted on **GitHub Pages**
-- Generated with the help of **Claude 3.5 Sonnet**
+- Generated with the help of **Claude 3.7 Sonnet**
 
 ## ⚠️ Troubleshooting
 
