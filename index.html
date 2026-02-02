@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>QR Code Scanner</title>
     <script type="module" src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js"></script>
     <style>
@@ -12,39 +12,50 @@
             box-sizing: border-box;
         }
         
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            padding: 15px;
         }
         
         .container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 30px;
-            max-width: 500px;
+            padding: 20px;
             width: 100%;
-            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 30px);
+            overflow: hidden;
         }
         
         h1 {
             color: #333;
-            margin-bottom: 20px;
-            font-size: 2em;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            text-align: center;
+            flex-shrink: 0;
         }
         
         #video-container {
             position: relative;
-            margin: 20px 0;
+            margin: 10px 0;
             border-radius: 15px;
             overflow: hidden;
             background: #f0f0f0;
-            min-height: 300px;
+            flex: 1;
+            min-height: 200px;
+            max-height: 400px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,26 +63,32 @@
         
         #qr-video {
             width: 100%;
-            height: auto;
-            max-height: 400px;
+            height: 100%;
+            object-fit: cover;
             border-radius: 15px;
         }
         
         .controls {
-            margin: 20px 0;
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
         }
         
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 25px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 5px;
-            min-width: 120px;
+            flex: 1;
+            min-width: 100px;
+            max-width: 150px;
         }
         
         button:hover {
@@ -86,83 +103,97 @@
             box-shadow: none;
         }
         
-        #result-container {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            min-height: 80px;
+        #status {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+            font-size: 14px;
+            min-height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: left;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+        
+        #result-container {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            flex-shrink: 0;
+            max-height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         #result {
             color: #333;
-            font-size: 16px;
+            font-size: 14px;
             word-break: break-all;
             line-height: 1.5;
-            width: 100%;
         }
         
-        .status {
+        .status-idle {
+            background: #f8f9fa;
             color: #666;
-            font-style: italic;
-            margin: 10px 0;
         }
         
-        .success {
-            color: #28a745;
+        .status-success {
+            background: #d4edda;
+            color: #155724;
             font-weight: bold;
         }
         
-        .error {
-            color: #dc3545;
+        .status-scanning {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .result-link {
+            color: #007bff;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        
+        .result-label {
             font-weight: bold;
+            margin-bottom: 5px;
         }
         
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .debug {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
+        .result-content {
+            background: white;
             padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            text-align: left;
+            border-radius: 8px;
+            border-left: 3px solid #007bff;
+            margin-top: 5px;
         }
         
         @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
             .container {
-                margin: 10px;
-                padding: 20px;
+                height: calc(100vh - 20px);
+                padding: 15px;
             }
             
             h1 {
-                font-size: 1.5em;
+                font-size: 1.3em;
+                margin-bottom: 10px;
             }
             
             button {
-                font-size: 14px;
-                padding: 10px 20px;
-                min-width: 100px;
+                font-size: 13px;
+                padding: 8px 16px;
             }
         }
     </style>
@@ -173,9 +204,6 @@
         
         <div id="video-container">
             <video id="qr-video" playsinline></video>
-            <div id="camera-placeholder" style="display: none;">
-                <p>📷 Camera will appear here</p>
-            </div>
         </div>
         
         <div class="controls">
@@ -184,112 +212,146 @@
             <button id="clear-button" onclick="clearResults()">Clear Results</button>
         </div>
         
-        <div id="status" class="status">Click "Start Camera" to begin scanning</div>
+        <div id="status" class="status-idle">Click "Start Camera" to begin scanning</div>
         
         <div id="result-container">
             <div id="result">Ready to scan QR codes...</div>
         </div>
-        
-        <div id="debug" class="debug" style="display: none;"></div>
     </div>
 
     <script type="module">
         import QrScanner from 'https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js';
         
         let qrScanner = null;
+        let lastScannedCode = '';
+        let scanTimeout = null;
+        let isProcessing = false;
+        
         const video = document.getElementById('qr-video');
         const startButton = document.getElementById('start-button');
         const stopButton = document.getElementById('stop-button');
         const status = document.getElementById('status');
         const result = document.getElementById('result');
-        const debug = document.getElementById('debug');
+        
+        // Create beep sound using Web Audio API
+        function playBeep() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800; // Frequency in Hz
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
         
         // Make functions global
         window.startScanner = startScanner;
         window.stopScanner = stopScanner;
         window.clearResults = clearResults;
         
-        function logDebug(message, data = null) {
-            console.log(message, data);
-            debug.style.display = 'block';
-            debug.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
-            if (data) {
-                debug.innerHTML += `<div>Data: ${JSON.stringify(data)}</div>`;
-            }
-        }
-        
-        function updateStatus(message, className = '') {
+        function updateStatus(message, className = 'status-idle') {
             status.textContent = message;
-            status.className = `status ${className}`;
-            logDebug(`Status: ${message}`);
+            status.className = className;
         }
         
         function updateResult(content) {
             result.innerHTML = content;
-            logDebug(`Result updated: ${content}`);
+            // Scroll to top of result container
+            result.parentElement.scrollTop = 0;
         }
         
         function clearResults() {
             updateResult('Ready to scan QR codes...');
-            debug.innerHTML = '';
-            debug.style.display = 'none';
-            updateStatus('Results cleared');
+            updateStatus('Results cleared', 'status-idle');
+            lastScannedCode = '';
+            isProcessing = false;
         }
         
-        function handleQRResult(result) {
-            logDebug('QR Code detected!', result);
-            
-            updateStatus('✅ QR Code detected!', 'success');
-            
-            // Handle different result formats
+        function handleQRResult(resultObj) {
+            // Extract the actual content
             let qrContent = '';
-            
-            if (typeof result === 'string') {
-                qrContent = result;
-            } else if (result && result.data) {
-                qrContent = result.data;
-            } else if (result && result.text) {
-                qrContent = result.text;
+            if (typeof resultObj === 'string') {
+                qrContent = resultObj;
+            } else if (resultObj && resultObj.data) {
+                qrContent = resultObj.data;
+            } else if (resultObj && resultObj.text) {
+                qrContent = resultObj.text;
             } else {
-                qrContent = String(result);
+                qrContent = String(resultObj);
             }
             
-            logDebug('Extracted content', qrContent);
-            
-            if (!qrContent || qrContent.trim() === '') {
-                updateResult('<strong>⚠️ QR Code detected but content is empty</strong>');
+            // Prevent processing the same code multiple times
+            if (qrContent === lastScannedCode && isProcessing) {
                 return;
             }
             
-            // Format the display
+            // Clear any existing timeout
+            if (scanTimeout) {
+                clearTimeout(scanTimeout);
+            }
+            
+            // Set processing flag
+            isProcessing = true;
+            lastScannedCode = qrContent;
+            
+            // Play beep sound
+            try {
+                playBeep();
+            } catch (e) {
+                console.log('Could not play beep sound:', e);
+            }
+            
+            // Update status once
+            updateStatus('✅ QR Code scanned successfully!', 'status-success');
+            
+            if (!qrContent || qrContent.trim() === '') {
+                updateResult('<div class="result-label">⚠️ Empty QR Code</div>');
+                isProcessing = false;
+                return;
+            }
+            
+            // Format the display based on content type
             let displayContent = '';
             
             if (qrContent.startsWith('http://') || qrContent.startsWith('https://')) {
                 displayContent = `
-                    <strong>🔗 URL Detected:</strong><br><br>
-                    <a href="${qrContent}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline;">
-                        ${qrContent}
-                    </a><br><br>
-                    <small style="color: #666;">Click to open link</small>
+                    <div class="result-label">🔗 URL:</div>
+                    <div class="result-content">
+                        <a href="${qrContent}" target="_blank" rel="noopener noreferrer" class="result-link">
+                            ${qrContent}
+                        </a>
+                    </div>
                 `;
             } else if (qrContent.includes('@') && qrContent.includes('.')) {
                 displayContent = `
-                    <strong>📧 Email Detected:</strong><br><br>
-                    <a href="mailto:${qrContent}" style="color: #007bff;">
-                        ${qrContent}
-                    </a>
+                    <div class="result-label">📧 Email:</div>
+                    <div class="result-content">
+                        <a href="mailto:${qrContent}" class="result-link">
+                            ${qrContent}
+                        </a>
+                    </div>
                 `;
             } else if (qrContent.startsWith('tel:')) {
                 displayContent = `
-                    <strong>📞 Phone Number:</strong><br><br>
-                    <a href="${qrContent}" style="color: #007bff;">
-                        ${qrContent.replace('tel:', '')}
-                    </a>
+                    <div class="result-label">📞 Phone:</div>
+                    <div class="result-content">
+                        <a href="${qrContent}" class="result-link">
+                            ${qrContent.replace('tel:', '')}
+                        </a>
+                    </div>
                 `;
             } else {
                 displayContent = `
-                    <strong>📄 Text Content:</strong><br><br>
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
+                    <div class="result-label">📄 Text Content:</div>
+                    <div class="result-content">
                         ${qrContent}
                     </div>
                 `;
@@ -297,32 +359,34 @@
             
             updateResult(displayContent);
             
-            // Add copy to clipboard functionality
-            setTimeout(() => {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(qrContent).then(() => {
-                        updateStatus('✅ Content copied to clipboard!', 'success');
-                    }).catch(() => {
-                        updateStatus('✅ QR Code scanned successfully!', 'success');
-                    });
-                }
-            }, 1000);
+            // Copy to clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(qrContent).catch(() => {
+                    console.log('Could not copy to clipboard');
+                });
+            }
+            
+            // Reset processing flag after 2 seconds to allow scanning new codes
+            scanTimeout = setTimeout(() => {
+                isProcessing = false;
+                updateStatus('📷 Ready to scan another code', 'status-scanning');
+            }, 2000);
         }
         
         function startScanner() {
-            updateStatus('Starting camera...', 'loading');
+            updateStatus('Starting camera...', 'status-scanning');
             updateResult('Initializing scanner...');
-            logDebug('Starting QR scanner...');
             
             startButton.disabled = true;
+            lastScannedCode = '';
+            isProcessing = false;
             
             qrScanner = new QrScanner(
                 video,
                 handleQRResult,
                 {
                     onDecodeError: error => {
-                        // This is normal - it means no QR code in frame
-                        // Don't log this as it's too noisy
+                        // Silently ignore - this is normal when no QR code is in view
                     },
                     highlightScanRegion: true,
                     highlightCodeOutline: true,
@@ -330,16 +394,14 @@
             );
             
             qrScanner.start().then(() => {
-                updateStatus('📷 Camera active - Point at a QR code', 'success');
+                updateStatus('📷 Point at a QR code', 'status-scanning');
                 updateResult('Scanning for QR codes...');
                 startButton.disabled = true;
                 stopButton.disabled = false;
-                logDebug('Scanner started successfully');
             }).catch(error => {
                 console.error('Failed to start scanner:', error);
-                logDebug('Scanner start error', error);
-                updateStatus('❌ Failed to start camera', 'error');
-                updateResult(`Error: ${error.message || 'Could not access camera'}. Make sure you\'re using HTTPS and have given camera permissions.`);
+                updateStatus('❌ Camera access denied', 'status-error');
+                updateResult(`Error: ${error.message || 'Could not access camera'}`);
                 startButton.disabled = false;
             });
         }
@@ -350,20 +412,26 @@
                 qrScanner.destroy();
                 qrScanner = null;
                 
-                updateStatus('📷 Camera stopped', '');
-                logDebug('Scanner stopped');
+                updateStatus('Camera stopped', 'status-idle');
                 
                 startButton.disabled = false;
                 stopButton.disabled = true;
+                
+                lastScannedCode = '';
+                isProcessing = false;
+                
+                if (scanTimeout) {
+                    clearTimeout(scanTimeout);
+                    scanTimeout = null;
+                }
             }
         }
         
         // Check HTTPS requirement
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-            updateStatus('⚠️ HTTPS required for camera access', 'error');
-            updateResult('This app requires HTTPS to access your camera. Please use HTTPS or localhost.');
+            updateStatus('⚠️ HTTPS required', 'status-error');
+            updateResult('This app requires HTTPS to access your camera.');
             startButton.disabled = true;
-            logDebug('HTTPS check failed');
         }
         
         // Cleanup on page unload
