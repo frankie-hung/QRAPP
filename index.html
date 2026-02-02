@@ -95,6 +95,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: left;
         }
         
         #result {
@@ -102,6 +103,7 @@
             font-size: 16px;
             word-break: break-all;
             line-height: 1.5;
+            width: 100%;
         }
         
         .status {
@@ -136,6 +138,17 @@
             100% { transform: rotate(360deg); }
         }
         
+        .debug {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+        }
+        
         @media (max-width: 480px) {
             .container {
                 margin: 10px;
@@ -168,6 +181,7 @@
         <div class="controls">
             <button id="start-button" onclick="startScanner()">Start Camera</button>
             <button id="stop-button" onclick="stopScanner()" disabled>Stop Camera</button>
+            <button id="clear-button" onclick="clearResults()">Clear Results</button>
         </div>
         
         <div id="status" class="status">Click "Start Camera" to begin scanning</div>
@@ -175,6 +189,8 @@
         <div id="result-container">
             <div id="result">Ready to scan QR codes...</div>
         </div>
+        
+        <div id="debug" class="debug" style="display: none;"></div>
     </div>
 
     <script type="module">
@@ -186,52 +202,130 @@
         const stopButton = document.getElementById('stop-button');
         const status = document.getElementById('status');
         const result = document.getElementById('result');
+        const debug = document.getElementById('debug');
         
-        // Make functions global so they can be called from onclick
+        // Make functions global
         window.startScanner = startScanner;
         window.stopScanner = stopScanner;
+        window.clearResults = clearResults;
+        
+        function logDebug(message, data = null) {
+            console.log(message, data);
+            debug.style.display = 'block';
+            debug.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            if (data) {
+                debug.innerHTML += `<div>Data: ${JSON.stringify(data)}</div>`;
+            }
+        }
         
         function updateStatus(message, className = '') {
             status.textContent = message;
             status.className = `status ${className}`;
+            logDebug(`Status: ${message}`);
         }
         
         function updateResult(content) {
             result.innerHTML = content;
+            logDebug(`Result updated: ${content}`);
+        }
+        
+        function clearResults() {
+            updateResult('Ready to scan QR codes...');
+            debug.innerHTML = '';
+            debug.style.display = 'none';
+            updateStatus('Results cleared');
+        }
+        
+        function handleQRResult(result) {
+            logDebug('QR Code detected!', result);
+            
+            updateStatus('✅ QR Code detected!', 'success');
+            
+            // Handle different result formats
+            let qrContent = '';
+            
+            if (typeof result === 'string') {
+                qrContent = result;
+            } else if (result && result.data) {
+                qrContent = result.data;
+            } else if (result && result.text) {
+                qrContent = result.text;
+            } else {
+                qrContent = String(result);
+            }
+            
+            logDebug('Extracted content', qrContent);
+            
+            if (!qrContent || qrContent.trim() === '') {
+                updateResult('<strong>⚠️ QR Code detected but content is empty</strong>');
+                return;
+            }
+            
+            // Format the display
+            let displayContent = '';
+            
+            if (qrContent.startsWith('http://') || qrContent.startsWith('https://')) {
+                displayContent = `
+                    <strong>🔗 URL Detected:</strong><br><br>
+                    <a href="${qrContent}" target="_blank" rel="noopener noreferrer" style="color: #007bff; text-decoration: underline;">
+                        ${qrContent}
+                    </a><br><br>
+                    <small style="color: #666;">Click to open link</small>
+                `;
+            } else if (qrContent.includes('@') && qrContent.includes('.')) {
+                displayContent = `
+                    <strong>📧 Email Detected:</strong><br><br>
+                    <a href="mailto:${qrContent}" style="color: #007bff;">
+                        ${qrContent}
+                    </a>
+                `;
+            } else if (qrContent.startsWith('tel:')) {
+                displayContent = `
+                    <strong>📞 Phone Number:</strong><br><br>
+                    <a href="${qrContent}" style="color: #007bff;">
+                        ${qrContent.replace('tel:', '')}
+                    </a>
+                `;
+            } else {
+                displayContent = `
+                    <strong>📄 Text Content:</strong><br><br>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
+                        ${qrContent}
+                    </div>
+                `;
+            }
+            
+            updateResult(displayContent);
+            
+            // Add copy to clipboard functionality
+            setTimeout(() => {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(qrContent).then(() => {
+                        updateStatus('✅ Content copied to clipboard!', 'success');
+                    }).catch(() => {
+                        updateStatus('✅ QR Code scanned successfully!', 'success');
+                    });
+                }
+            }, 1000);
         }
         
         function startScanner() {
             updateStatus('Starting camera...', 'loading');
             updateResult('Initializing scanner...');
+            logDebug('Starting QR scanner...');
             
             startButton.disabled = true;
             
             qrScanner = new QrScanner(
                 video,
-                result => {
-                    updateStatus('✅ QR Code detected!', 'success');
-                    
-                    // Check if it's a URL
-                    let displayContent = result.data;
-                    if (result.data.startsWith('http://') || result.data.startsWith('https://')) {
-                        displayContent = `<strong>URL Found:</strong><br>
-                                        <a href="${result.data}" target="_blank" rel="noopener noreferrer">${result.data}</a>`;
-                    } else {
-                        displayContent = `<strong>QR Code Content:</strong><br>${result.data}`;
-                    }
-                    
-                    updateResult(displayContent);
-                    
-                    // Auto-stop after successful scan (optional)
-                    // setTimeout(() => stopScanner(), 3000);
-                },
-                error => {
-                    console.warn('QR Scanner error:', error);
-                    if (error.name === 'NotAllowedError') {
-                        updateStatus('❌ Camera access denied', 'error');
-                        updateResult('Please allow camera access and try again.');
-                        startButton.disabled = false;
-                    }
+                handleQRResult,
+                {
+                    onDecodeError: error => {
+                        // This is normal - it means no QR code in frame
+                        // Don't log this as it's too noisy
+                    },
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
                 }
             );
             
@@ -240,10 +334,12 @@
                 updateResult('Scanning for QR codes...');
                 startButton.disabled = true;
                 stopButton.disabled = false;
+                logDebug('Scanner started successfully');
             }).catch(error => {
                 console.error('Failed to start scanner:', error);
+                logDebug('Scanner start error', error);
                 updateStatus('❌ Failed to start camera', 'error');
-                updateResult('Error: Could not access camera. Make sure you\'re using HTTPS and have given camera permissions.');
+                updateResult(`Error: ${error.message || 'Could not access camera'}. Make sure you\'re using HTTPS and have given camera permissions.`);
                 startButton.disabled = false;
             });
         }
@@ -255,18 +351,19 @@
                 qrScanner = null;
                 
                 updateStatus('📷 Camera stopped', '');
-                updateResult('Scanner stopped. Click "Start Camera" to scan again.');
+                logDebug('Scanner stopped');
                 
                 startButton.disabled = false;
                 stopButton.disabled = true;
             }
         }
         
-        // Check if we're on HTTPS (required for camera access)
+        // Check HTTPS requirement
         if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
             updateStatus('⚠️ HTTPS required for camera access', 'error');
             updateResult('This app requires HTTPS to access your camera. Please use HTTPS or localhost.');
             startButton.disabled = true;
+            logDebug('HTTPS check failed');
         }
         
         // Cleanup on page unload
