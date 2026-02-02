@@ -1,8 +1,8 @@
-# 📱 QRAPP - Simple QR Code Scanner
+# 📱 Simple QR Code Scanner
 
 A lightweight, browser-based QR code scanner web application that works directly in your mobile or desktop browser. No app installation required!
 
-**🔗 Live Demo:** [https://frankie-hung.github.io/QRAPP/](https://frankie-hung.github.io/QRAPP/)
+**🔗 Live Demo:** [https://frankie-hung.github.io/qr-reader/](https://frankie-hung.github.io/qr-reader/)
 
 ## ✨ Features
 
@@ -14,7 +14,7 @@ A lightweight, browser-based QR code scanner web application that works directly
 
 ## 🚀 How to Use
 
-1. Open the [Live Demo](https://frankie-hung.github.io/QRAPP/) on your phone or computer.
+1. Open the [Live Demo](https://frankie-hung.github.io/qr-reader/) on your phone or computer.
 2. Grant **Camera Permissions** when prompted.
 3. Point your camera at a QR code.
 4. View the result instantly on screen!
